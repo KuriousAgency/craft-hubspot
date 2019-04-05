@@ -1,0 +1,26 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Hubspot plugin for Craft CMS 3.x
+ *
+ * Hubspot Settings.twig
+ *
+ * @author    Kurious Agency
+ * @copyright Copyright (c) 2018 Kurious Agency
+ * @link      https://kurious.agency
+ * @package   Hubspot
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("kuriousagency\\hubspot\\assetbundles\\hubspot\\HubspotAsset") %}
+
+{{ forms.textField({
+    label: 'API Key',
+    instructions: 'Please enter your Hubspot API Key',
+    id: 'apiKey',
+    name: 'apiKey',
+    value: settings['apiKey']})
+}}

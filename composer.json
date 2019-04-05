@@ -1,0 +1,43 @@
+{
+    "name": "kuriousagency/craft-hubspot",
+    "description": "Hubspot plugin for Craft CMS",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "hubspot"
+    ],
+    "support": {
+        "docs": "https://github.com/kuriousagency/hubspot/blob/master/README.md",
+        "issues": "https://github.com/kuriousagency/hubspot/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kurious Agency",
+            "homepage": "https://kurious.agency"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "kuriousagency\\hubspot\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Hubspot",
+        "handle": "hubspot",
+        "hasCpSettings": true,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/kuriousagency/hubspot/master/CHANGELOG.md",
+        "components": {
+            "hubspotService": "kuriousagency\\hubspot\\services\\HubspotService"
+        },
+        "class": "kuriousagency\\hubspot\\Hubspot"
+    }
+}
