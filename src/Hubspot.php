@@ -124,7 +124,7 @@ class Hubspot extends Plugin
 			$reviewPath = "review/".$order->number;
 			$url = UrlHelper::siteUrl($reviewPath);
 
-			$dataArray['order_date'] = 1000 * strtotime($order->dateOrdered->format('Y-m-d'));
+			$dataArray['order_date'] = 1000 * strtotime($order->dateOrdered);
 			$dataArray['order_review_link'] = $url;
 			$dataArray['lifecyclestage'] = "customer";
 	
