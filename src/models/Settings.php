@@ -29,6 +29,12 @@ class Settings extends Model
      * @var string
      */
     public $apiKey = '';
+    public $userDescriptionField = '';
+    public $jobTitleField = '';
+    public $pipeline = '';
+    public $dealStage = '';
+    public $orderReferenceField = '';
+    public $productDescriptionField = '';
 
     // Public Methods
     // =========================================================================

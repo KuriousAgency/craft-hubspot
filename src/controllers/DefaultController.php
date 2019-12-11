@@ -17,6 +17,8 @@ use craft\web\Controller;
 use craft\commerce\Plugin as Commerce;
 use craft\helpers\UrlHelper;
 
+use craft\elements\User;
+
 /**
  * @author    Kurious Agency
  * @package   Hubspot
@@ -43,20 +45,28 @@ class DefaultController extends Controller
      */
     public function actionIndex()
     {
-        $result = 'Welcome to the DefaultController actionIndex() method';
-
-        return $result;
+        return $this->renderTemplate('hubspot/index');
     }
 
     /**
      * @return mixed
      */
-    public function actionDoSomething()
+    public function actionSaveSettings()
     {
         $result = 'Welcome to the DefaultController actionDoSomething() method';
 
         return $result;
-	}
+    }
+    
+    // public function actionTest()
+    // {
+    //     $users = User::find()->groupId(5)->all();
+    //     foreach ($users as $user) {
+    //         if (!$user->hubspotVid) {
+    //             Hubspot::$plugin->hubspot->saveUser($user);
+    //         }
+    //     }
+    // }
 	
 	// public function actionTest()
 	// {		

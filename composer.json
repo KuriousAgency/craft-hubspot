@@ -15,18 +15,16 @@
         "issues": "https://github.com/kuriousagency/hubspot/issues"
     },
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Kurious Agency",
-            "homepage": "https://kurious.agency"
-        }
-    ],
+    "authors": [{
+        "name": "Kurious Agency",
+        "homepage": "https://kurious.agency"
+    }],
     "require": {
         "craftcms/cms": "^3.0.0-RC1"
     },
     "autoload": {
         "psr-4": {
-          "kuriousagency\\hubspot\\": "src/"
+            "kuriousagency\\hubspot\\": "src/"
         }
     },
     "extra": {

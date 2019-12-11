@@ -17,6 +17,7 @@ use kuriousagency\hubspot\models\Settings;
 use Craft;
 use craft\base\Plugin;
 use craft\services\Plugins;
+use craft\services\Elements;
 use craft\events\PluginEvent;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
@@ -25,7 +26,6 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\elements\User as UserElement;
 use craft\events\UserEvent;
 use craft\helpers\UrlHelper;
-
 
 use craft\commerce\elements\Order;
 use yii\base\Event;
@@ -56,7 +56,7 @@ class Hubspot extends Plugin
      * @var string
      */
     public $schemaVersion = '1.0.0';
-
+    
     // Public Methods
     // =========================================================================
 
@@ -76,7 +76,7 @@ class Hubspot extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['siteActionTrigger1'] = 'hubspot/default';
+                $event->rules['hs-test'] = 'hubspot/default/test';
             }
         );
 
@@ -84,7 +84,7 @@ class Hubspot extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['cpActionTrigger1'] = 'hubspot/default/do-something';
+                $event->rules['hubspot'] = 'hubspot/default/index';
             }
         );
 
@@ -119,24 +119,19 @@ class Hubspot extends Plugin
 		Event::on(Order::class, Order::EVENT_AFTER_COMPLETE_ORDER, function(Event $e) {
 
 			$order = $e->sender;
+            $this->hubspot->createDeals($order);
 
-			// get review email
-			$reviewPath = "review/".$order->number;
-			$url = UrlHelper::siteUrl($reviewPath);
+        });
+        
+        Event::on(Elements::class,Elements::EVENT_AFTER_SAVE_ELEMENT,function(Event $e) {
+			if ($e->element instanceof UserElement) {
 
-			$dataArray['order_date'] = 1000 * strtotime($order->dateOrdered);
-			$dataArray['order_review_link'] = $url;
-			$dataArray['lifecyclestage'] = "customer";
-	
-			$data = [];
-	
-			foreach($dataArray as $key=>$value) {
-				 $data['properties'][] = ['property'=>$key,'value'=>$value];
+				if($e->isNew) {
+                    $user = $e->element;
+                    $this->hubspot->saveUser($user);
+				}
 			}
-
-			Hubspot::$plugin->hubspot->updateByEmail($data,$order->email);
-
-		});
+        });
 
         // Event::on(UserElement::class, UserElement::EVENT_AFTER_SAVE,function(Event $event) {
 

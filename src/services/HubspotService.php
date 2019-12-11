@@ -19,6 +19,10 @@ use GuzzleHttp\Psr7\Request;
 
 use Craft;
 use craft\base\Component;
+use craft\elements\User;
+use craft\helpers\UrlHelper;
+use craft\commerce\elements\Order;
+use verbb\events\elements\Ticket;
 
 /**
  * @author    Kurious Agency
@@ -32,24 +36,90 @@ class HubspotService extends Component
 
     private $portalId;
     private $apiKey;
+    private $settings;
 
     public function init()
     {
-        $this->apiKey = Hubspot::$plugin->getSettings()->apiKey;
+        $this->settings = Hubspot::$plugin->getSettings();
+        $this->apiKey = $this->settings->apiKey;
+        
     }
 
-    public function saveUser(UserModel $user)
+    public function saveUser(User $user)
     {
 
-        $data = [
+        $dataArray = [
             'firstname' => $user->firstName,
             'lastname' => $user->lastName,
             'email' => $user->email,
-            'registration_date' => $user->dateCreated,
+            $this->settings->userDescriptionField => $this->_formatField($user->userDescription),
+            $this->settings->jobTitleField => $user->jobTitle->label
         ];  
+        // Craft::dd($data);
+        // custom fields, can it be done dynamically
+        foreach($dataArray as $key=>$value) {
+            $data['properties'][] = ['property'=>$key,'value'=>$value];
+        }
+        $response = $this->createOrUpdateByEmail($data,$user->email);
+        if ($response) {
+            $user->hubspotVid = json_decode($response->getBody())->vid;
+            Craft::$app->getElements()->saveElement($user,false);
+        }
+    }
+
+    public function createDeals(Order $order)
+    {
+        $url = "https://api.hubapi.com/deals/v1/deal?";
+        $params = UrlHelper::buildQuery([
+            'hapikey' => $this->apiKey,
+        ]);
+        $url = $url . $params;
+        $client = new Client(['base_uri'=>$url]);
+
+        // Check if events is installed and check if event ticket
+        $user = $order->user;
+        foreach ($order->lineitems as $lineitem) {
+            $data = [
+                'associations' => [
+                    'associatedVids' => [$user->hubspotVid]
+                ],
+                'properties' => [
+                    [
+                        'value' => $user->fullName . ' - ' . $lineitem->description,
+                        'name' => 'dealname' 
+                    ],
+                    [
+                        'value' => $this->settings->pipeline,
+                        'name' => 'pipeline'
+                    ],
+                    [
+                        'value' => $this->settings->dealStage,
+                        'name' => 'dealstage'
+                    ],
+                    [
+                        'value' => $order->reference,
+                        'name' => $this->settings->orderReferenceField
+                    ],
+                    [
+                        'value' => $lineitem->description,
+                        'name' => $this->settings->productDescriptionField
+                    ]
+                ]
+            ];
+
+            try {
+                $response = $client->post($url, [ 'json' => $data ]);
+            } catch (\Exception $e) {
+                Craft::error(
+                    'Hubspot Error updating deal '.$e->getMessage(),
+                    __METHOD__
+                );
+            }
+
+        }
         
-        $this->createOrUpdateByEmail($data,$user->email);
-      
+
+
     }
     
     public function createOrUpdateByEmail($data,$email)
@@ -61,13 +131,15 @@ class HubspotService extends Component
 		$client = new Client(['base_uri'=>$url]);
         // Submit to Hubspot
         try {
-            $client->post($url, [ 'json' => $data ]);
+            $response = $client->post($url, [ 'json' => $data ]);
+            return $response;
         } catch (\Exception $e) {
             Craft::error(
                 'Hubspot Error updating email '.$e->getMessage(),
                 __METHOD__
             );
-        }
+        };
+        return null;
 	}
 	
 	public function updateByEmail($data,$email)
@@ -116,4 +188,25 @@ class HubspotService extends Component
 
     }
 
+    // public function getUser($user)
+    // {
+    //     $url = "https://api.hubapi.com/contacts/v1/contact/email/".$user->email."/profile?";
+    //     $params = UrlHelper::buildQuery([
+    //         'hapikey' => $this->apiKey,
+    //     ]);
+    //     $url = $url . $params;
+    //     // Craft::dd($url);
+    //     $client = new Client(['base_uri'=>$url]);
+
+    //     $response = $client->get($url);
+    //     $user->hubspotVid = json_decode($response->getBody())->vid;
+    //     Craft::$app->getElements()->saveElement($user, false);
+    // }
+
+    private function _formatField($field)
+    {
+        $array = (array) $field;
+        $values = array_column($array,'value');
+        return implode(';',$values);
+    }
 }
