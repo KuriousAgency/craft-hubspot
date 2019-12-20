@@ -7,6 +7,7 @@ use craft\db\Migration;
 
 use mmikkel\incognitofield\fields\IncognitoFieldType as IncognitoField;
 use craft\elements\User;
+use kuriousagency\hubspot\Hubspot;
 
 /**
  * m191210_121349_add_fields_to_user migration.
