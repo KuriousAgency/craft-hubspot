@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Kurious Agency
  */
 
-namespace kuriousagency\hubspot\assetbundles\Hubspot;
+namespace kuriousagency\hubspot\assetbundles\hubspot;
 
 use Craft;
 use craft\web\AssetBundle;
